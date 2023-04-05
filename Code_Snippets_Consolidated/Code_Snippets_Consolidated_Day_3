@@ -1,0 +1,442 @@
+# This is the frontend for the News Articles app which displays list of articles and its summaries. It has a temporary data yet and this will be replaced by an API call to the server fetching the list of articles. This uses ReactJS Framework due to its dynamic features and its helpful libraries.
+
+## Features
+1) Displays the list of articles including their title, author, published date, and a sneak peak of its summary in the Home Page.
+2) Implemented clickable articles that open a detailed view, showing the full summary and a link to the original article.
+3) It contains a search bar to filter articles by keywords from its title and summary, and its source.
+4) It has pagination to limit the number of articles displayed per page.
+5) It is a responsive application that can be accessed with a mobile phone, tab, and desktop.
+
+# This serves as the client-side that contains files that are needed to display the frontend for the news article app. Overall it has 5 components namely, DetailNewsArticle, Home, NewsArticles, NewsArticle, and lastly, Pagination.
+
+## Components are 
+1) DetailNewsArticle.js - display the clicked article among the articles displayed from the Home Page and it displays information such as title, author, published date, source, summary, and the source link.
+This is the code snippit for the DetailNewsArticle.js.
+```
+import React from "react";
+import { useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+
+const DetailNewsArticle = () => {
+  const location = useLocation();
+  const data = location.state;
+  const newsArticle = data ? data : "";
+
+  const getBadgeColor = (source) => {
+    let color;
+    if (source === "BBC") {
+      color = "badge-primary";
+    } else if (source === "Daily Mail") {
+      color = "badge-success";
+    } else if (source === "The Guardian") {
+      color = "badge-warning";
+    }
+
+    return color;
+  };
+
+  return (
+    <div className="mt-5 h-100 w-50 mx-auto">
+      <Link to="/">Go back to Home</Link>
+      <h1 className="news__title mt-5">{newsArticle.title}</h1>
+      <span className={"badge mr-2 " + getBadgeColor(newsArticle.source)}>
+        {newsArticle.source}
+      </span>
+      <span className="ml-2 news__author">{newsArticle.author}</span>
+      <p className="news__published">
+        {newsArticle.published_date.substring(0, 10)}
+      </p>
+      <p className="news__desc text-justify">
+        {newsArticle.summarized_content}
+      </p>
+      <a href={newsArticle.url} target="_blank">Go to its article link.</a>
+    </div>
+  );
+};
+
+export default DetailNewsArticle;
+```
+2) Home.js - displays the list of articles with information such as title, author, published date, source, and a sneak peak of its summary. It has pagination where it displays six articles at most.
+```
+import React, { useState, useEffect } from "react";
+import NewsArticles from "./NewsArticles";
+import Pagination from "./Pagination";
+import axios from "axios";
+import "../App.css";
+
+const Home = () => {
+  const [newsArticles, setNewsArticles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [newsArticlesPerPage] = useState(6);
+  const [searchValue, setSearchValue] = useState("");
+
+  const news_articles = [
+    {
+      id: 21,
+      url: "https://www.bbc.com/news/entertainment-arts-65107949",
+      title: "Paul O'Grady: A life in pictures",
+      author: "Adam Durbin",
+      published_date: "2023-03-29T00:00:00Z",
+      parsed_content:
+        "Presenter, comedian and drag queen Paul O'Grady, who has died aged 67, had a vibrant and varied career in the entertainment industry spanning more than three decades. After making his mark on London's comedy scene as Lily Savage, O'Grady would go on to become one of the most recognisable faces on TV. All pictures subject to copyright. Camilla and Sir Elton lead Paul O'Grady tributes The story behind a drag icon (with a love of dogs) Paul O'Grady was 'a voice for a queer generation' TV star Paul O'Grady dies aged 67",
+      summarized_content:
+        "Presenter, comedian and drag queen Paul O'Grady, who has died aged 67, had a vibrant and varied career in the entertainment industry spanning more than three decades.\n\nAfter making his mark on London's comedy scene as Lily Savage, O'Grady would go on to become one of the most recognisable faces on TV.\n\nO'Grady was a voice for a queer generation and will be remembered as a TV star.",
+      source: "BBC"
+    },
+  ];
+
+  useEffect(() => {
+    // const fetchNewsArticles = async () => {
+    //   setLoading(true);
+    //   // const res = await axios.get("https://jsonplaceholder.typicode.com/posts");
+    //   // setPosts(res.data);
+    //   setNewsArticles(news_articles); 
+    //   setLoading(false);
+    // };
+    // fetchPosts();
+    const fetchNewsArticles = () => {
+      setLoading(true);
+      setNewsArticles(news_articles);  
+      setLoading(false);
+    };
+    fetchNewsArticles();  
+  }, []);
+
+  // Get current news articles
+  const indexOfLastPost = currentPage * newsArticlesPerPage;
+  const indexOfFirstPost = indexOfLastPost - newsArticlesPerPage;
+  const currentNewsArticles = newsArticles.slice(indexOfFirstPost, indexOfLastPost);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  console.log(currentNewsArticles)
+  return (
+    <div className="container mt-5">
+      <h1 className="col text-primary mb-5 p-0">News Articles</h1>
+      <div className="form-group mb-5">
+        <input className="form-control" 
+import React, { useState, useEffect } from "react";
+import NewsArticles from "./NewsArticles";
+import Pagination from "./Pagination";
+import axios from "axios";
+import "../App.css";
+
+const Home = () => {
+  const [newsArticles, setNewsArticles] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [newsArticlesPerPage] = useState(6);
+  const [searchValue, setSearchValue] = useState("");
+
+  const news_articles = [
+    {
+      id: 5,
+      url: "https://www.bbc.com/news/world-us-canada-65012096",
+      title: "Will Trump have his mugshot taken?",
+      author: "Anthony Zurcher & Nadine Yousif",
+      published_date: "2023-04-04T00:00:00Z",
+      parsed_content:
+        "This video can not be played Watch: What happens when Trump is arrested - in 70 seconds Donald Trump faces imminent arrest on charges stemming from an investigation into a $130,000 (£106,000) payment to porn star Stormy Daniels in 2016. The 76-year-old departed Florida on Monday, landing in New York ahead of his arrest and court appearance on Tuesday.  He is the first former US president to face criminal charges, but it won't be clear what the charges are until the indictment is unsealed at his arraignment. Mr Trump is planning to surrender to authorities on Tuesday, and his arraignment is scheduled for 14:15 local time (19:15 BST). He will likely arrive at the courthouse about an hour or so before that for processing.  The former president is expected first to surrender at the office of Manhattan District Attorney Alvin Bragg.  The usual arrest paperwork will be completed - meaning his details will be taken and investigators will check for any outstanding arrest warrants or charges. Once Mr Trump is fingerprinted and processed by officials, he is considered under arrest and in custody. A \"perp walk\" refers to when law enforcement officers walk a suspect up to a courthouse through a public space, giving spectators and the media full view of the arrest. This video can not be played Was Trump's Stormy Daniels payment legal? It remains unknown whether Mr Trump will be walked up to the Lower Manhattan courthouse in such a manner ahead of his arraignment, or whether he will be discreetly let in through a side door surrounded by Secret Service agents. We do know that there will be a massive law enforcement presence around the courthouse and near Trump Tower on Tuesday. The FBI, New York City police and the US Secret Service are all coordinating security for the proceedings. It is also unknown whether a mugshot of the former president will be taken when he is booked at the Manhattan courthouse.  According to the New York Police Department, a suspect may have their photograph taken at the time of their arrest - but only in some cases, suggesting an element of discretion. One of Mr Trump's lawyers, Alina Habba, told CNN on Monday that she does not believe a mugshot is needed because the former president is an easily recognisable figure. \"Mugshots are for people so that you recognize who they are. He is the most recognized face in the world, let alone the country right now, so there's no need for that,\" Ms Habba said. And on Tuesday, reports in US media suggested that Mr Bragg had decided there was no need to put the 76-year-old through the mugshot process. Were the photo to take place, there is no guarantee the public will ever see it. Under New York state law the former president would have to give his approval to its release, though US media has suggested he is not opposed to its publication. Reports in US media also said that Mr Trump likely will not be handcuffed, as the Manhattan District Attorney's office has concluded that there is no reason to do so.  Handcuffs are used to prevent a suspect from fleeing or from attacking the district attorney or court personnel.  Mr Trump will be surrounded by law enforcement, including several members of the US Secret Service, therefore the risk of him attempting to flee is fairly low. Once Mr Trump is processed, he will likely wait in a holding area until his appearance before Judge Juan Merchan.  Mr Trump will then enter the courtroom and be arraigned - meaning the charges will be read out and he will plead.  His lawyers have said that the former president will plead not guilty to the charges. The arraignment is open to the public. Members of the media and spectators have lined up overnight outside the courthouse to secure one of 260 tickets to enter the building during the proceedings. However, no electronics will be allowed inside the courtroom.  Judge Merchan has also ruled that no video coverage will be allowed. He has instead granted access to a few news cameras to take still photos of the scene inside the courtroom several minutes before the arraignment begins.  This video can not be played Watch: Trump supporters gather outside Mar-a-Lago Mr Trump is expected to be released on bail as he is scheduled to return to Florida later in the evening. It is unclear whether he will head to the airport straight from the courthouse, or if he will stop at Trump Tower before his departure.  One of Mr Trump's lawyers, Chris Kise, told CNN on Tuesday morning that he expects Mr Trump to speak to the cameras in the hallway outside of the courtroom - before and after his arraignment.  Once back at Mar-a-Lago, Mr Trump is expected to address supporters around 20:00 Florida time. A trial date will also be scheduled for Mr Trump at some point. The judge and legal teams will set a date for the next hearing and there will also be the process of discovery, in which the district attorney's office must turn over all of its information to Mr Trump's legal team. In reality, it could take months before another formal hearing takes place. If there is a trial, a conviction on a misdemeanour would result in a fine. If Mr Trump were convicted on a felony charge, he would face a maximum sentence of four years in prison, although some legal experts predict a fine is more probable and that any time behind bars is highly unlikely. Mr Trump, who is running for president in 2024, can still continue his campaign if he chooses - there is no US law that prevents a candidate who is found guilty of a crime from campaigning for, and serving as, president - even from prison. What Trump indictment means - a simple guide Anger and anxiety - inside pro-Trump online networks Can Trump turn prosecution into an election asset?",
+      summarized_content:
+        'Donald Trump faces imminent arrest on charges stemming from an investigation into a $130,000 (£106,000) payment to porn star Stormy Daniels in 2016. The 76-year-old departed Florida on Monday, landing in New York ahead of his arrest and court appearance on Tuesday. It is the first time a former US president will face criminal charges, but the charges will not be clear until the indictment is unsealed at his arraignment. Mr Trump is planning to surrender to authorities on Tuesday, and his arraignment is scheduled for 14:15 local time (19:15 BST). He will likely arrive at the courthouse about an hour or so before that for processing.\n\nThe former president is expected first to surrender at the office of Manhattan District Attorney Alvin Bragg. The usual arrest paperwork will be completed - meaning his details will be taken and investigators will check for any outstanding arrest warrants or charges. Once Mr Trump is fingerprinted and processed by officials, he is considered under arrest and in custody.\n\nA "perp walk" refers to when law enforcement officers walk a suspect up to a courthouse through a public space, giving spectators and the media full view of the arrest. It remains unknown whether Mr Trump will be walked up to the Lower Manhattan courthouse in such a manner ahead of his arraignment, or whether he will be discreetly let in through a side door surrounded by Secret Service agents.\n\nWe do know that there will be a massive law enforcement presence around the courthouse and near Trump Tower on Tuesday. The FBI, New York City police and the US Secret Service are all coordinating security for the proceedings.\n\nIt is also unknown whether a mugshot of the former president will be taken when he is booked at the Manhattan courthouse. According to the New York Police Department, a suspect may have their photograph taken at the time of their arrest - but only in some cases, suggesting an element of discretion. One of Mr Trump\'s lawyers, Alina Habba, told CNN on Monday that she does not believe a mugshot is needed because the former president is an easily recognisable figure.\n\nAnd on Tuesday, reports in US media suggested that Mr Bragg had decided there was no need to put the 76-year-old through the mugshot process. Were the photo to take place, there is no guarantee the public will ever see it. Under New York state law the former president would have to give his approval to its release, though US media',
+      source: "The Guardian",
+    },
+    {
+      id: 21,
+      url: "https://www.bbc.com/news/entertainment-arts-65107949",
+      title: "Paul O'Grady: A life in pictures",
+      author: "Adam Durbin",
+      published_date: "2023-03-29T00:00:00Z",
+      parsed_content:
+        "Presenter, comedian and drag queen Paul O'Grady, who has died aged 67, had a vibrant and varied career in the entertainment industry spanning more than three decades. After making his mark on London's comedy scene as Lily Savage, O'Grady would go on to become one of the most recognisable faces on TV. All pictures subject to copyright. Camilla and Sir Elton lead Paul O'Grady tributes The story behind a drag icon (with a love of dogs) Paul O'Grady was 'a voice for a queer generation' TV star Paul O'Grady dies aged 67",
+      summarized_content:
+        "Presenter, comedian and drag queen Paul O'Grady, who has died aged 67, had a vibrant and varied career in the entertainment industry spanning more than three decades.\n\nAfter making his mark on London's comedy scene as Lily Savage, O'Grady would go on to become one of the most recognisable faces on TV.\n\nO'Grady was a voice for a queer generation and will be remembered as a TV star.",
+      source: "BBC",
+    },
+    {
+      id: 5,
+      url: "https://www.bbc.com/news/world-us-canada-65012096",
+      title: "Will Trump have his mugshot taken?",
+      author: "Anthony Zurcher & Nadine Yousif",
+      published_date: "2023-04-04T00:00:00Z",
+      parsed_content:
+        "This video can not be played Watch: What happens when Trump is arrested - in 70 seconds Donald Trump faces imminent arrest on charges stemming from an investigation into a $130,000 (£106,000) payment to porn star Stormy Daniels in 2016. The 76-year-old departed Florida on Monday, landing in New York ahead of his arrest and court appearance on Tuesday.  He is the first former US president to face criminal charges, but it won't be clear what the charges are until the indictment is unsealed at his arraignment. Mr Trump is planning to surrender to authorities on Tuesday, and his arraignment is scheduled for 14:15 local time (19:15 BST). He will likely arrive at the courthouse about an hour or so before that for processing.  The former president is expected first to surrender at the office of Manhattan District Attorney Alvin Bragg.  The usual arrest paperwork will be completed - meaning his details will be taken and investigators will check for any outstanding arrest warrants or charges. Once Mr Trump is fingerprinted and processed by officials, he is considered under arrest and in custody. A \"perp walk\" refers to when law enforcement officers walk a suspect up to a courthouse through a public space, giving spectators and the media full view of the arrest. This video can not be played Was Trump's Stormy Daniels payment legal? It remains unknown whether Mr Trump will be walked up to the Lower Manhattan courthouse in such a manner ahead of his arraignment, or whether he will be discreetly let in through a side door surrounded by Secret Service agents. We do know that there will be a massive law enforcement presence around the courthouse and near Trump Tower on Tuesday. The FBI, New York City police and the US Secret Service are all coordinating security for the proceedings. It is also unknown whether a mugshot of the former president will be taken when he is booked at the Manhattan courthouse.  According to the New York Police Department, a suspect may have their photograph taken at the time of their arrest - but only in some cases, suggesting an element of discretion. One of Mr Trump's lawyers, Alina Habba, told CNN on Monday that she does not believe a mugshot is needed because the former president is an easily recognisable figure. \"Mugshots are for people so that you recognize who they are. He is the most recognized face in the world, let alone the country right now, so there's no need for that,\" Ms Habba said. And on Tuesday, reports in US media suggested that Mr Bragg had decided there was no need to put the 76-year-old through the mugshot process. Were the photo to take place, there is no guarantee the public will ever see it. Under New York state law the former president would have to give his approval to its release, though US media has suggested he is not opposed to its publication. Reports in US media also said that Mr Trump likely will not be handcuffed, as the Manhattan District Attorney's office has concluded that there is no reason to do so.  Handcuffs are used to prevent a suspect from fleeing or from attacking the district attorney or court personnel.  Mr Trump will be surrounded by law enforcement, including several members of the US Secret Service, therefore the risk of him attempting to flee is fairly low. Once Mr Trump is processed, he will likely wait in a holding area until his appearance before Judge Juan Merchan.  Mr Trump will then enter the courtroom and be arraigned - meaning the charges will be read out and he will plead.  His lawyers have said that the former president will plead not guilty to the charges. The arraignment is open to the public. Members of the media and spectators have lined up overnight outside the courthouse to secure one of 260 tickets to enter the building during the proceedings. However, no electronics will be allowed inside the courtroom.  Judge Merchan has also ruled that no video coverage will be allowed. He has instead granted access to a few news cameras to take still photos of the scene inside the courtroom several minutes before the arraignment begins.  This video can not be played Watch: Trump supporters gather outside Mar-a-Lago Mr Trump is expected to be released on bail as he is scheduled to return to Florida later in the evening. It is unclear whether he will head to the airport straight from the courthouse, or if he will stop at Trump Tower before his departure.  One of Mr Trump's lawyers, Chris Kise, told CNN on Tuesday morning that he expects Mr Trump to speak to the cameras in the hallway outside of the courtroom - before and after his arraignment.  Once back at Mar-a-Lago, Mr Trump is expected to address supporters around 20:00 Florida time. A trial date will also be scheduled for Mr Trump at some point. The judge and legal teams will set a date for the next hearing and there will also be the process of discovery, in which the district attorney's office must turn over all of its information to Mr Trump's legal team. In reality, it could take months before another formal hearing takes place. If there is a trial, a conviction on a misdemeanour would result in a fine. If Mr Trump were convicted on a felony charge, he would face a maximum sentence of four years in prison, although some legal experts predict a fine is more probable and that any time behind bars is highly unlikely. Mr Trump, who is running for president in 2024, can still continue his campaign if he chooses - there is no US law that prevents a candidate who is found guilty of a crime from campaigning for, and serving as, president - even from prison. What Trump indictment means - a simple guide Anger and anxiety - inside pro-Trump online networks Can Trump turn prosecution into an election asset?",
+      summarized_content:
+        'Donald Trump faces imminent arrest on charges stemming from an investigation into a $130,000 (£106,000) payment to porn star Stormy Daniels in 2016. The 76-year-old departed Florida on Monday, landing in New York ahead of his arrest and court appearance on Tuesday. It is the first time a former US president will face criminal charges, but the charges will not be clear until the indictment is unsealed at his arraignment. Mr Trump is planning to surrender to authorities on Tuesday, and his arraignment is scheduled for 14:15 local time (19:15 BST). He will likely arrive at the courthouse about an hour or so before that for processing.\n\nThe former president is expected first to surrender at the office of Manhattan District Attorney Alvin Bragg. The usual arrest paperwork will be completed - meaning his details will be taken and investigators will check for any outstanding arrest warrants or charges. Once Mr Trump is fingerprinted and processed by officials, he is considered under arrest and in custody.\n\nA "perp walk" refers to when law enforcement officers walk a suspect up to a courthouse through a public space, giving spectators and the media full view of the arrest. It remains unknown whether Mr Trump will be walked up to the Lower Manhattan courthouse in such a manner ahead of his arraignment, or whether he will be discreetly let in through a side door surrounded by Secret Service agents.\n\nWe do know that there will be a massive law enforcement presence around the courthouse and near Trump Tower on Tuesday. The FBI, New York City police and the US Secret Service are all coordinating security for the proceedings.\n\nIt is also unknown whether a mugshot of the former president will be taken when he is booked at the Manhattan courthouse. According to the New York Police Department, a suspect may have their photograph taken at the time of their arrest - but only in some cases, suggesting an element of discretion. One of Mr Trump\'s lawyers, Alina Habba, told CNN on Monday that she does not believe a mugshot is needed because the former president is an easily recognisable figure.\n\nAnd on Tuesday, reports in US media suggested that Mr Bragg had decided there was no need to put the 76-year-old through the mugshot process. Were the photo to take place, there is no guarantee the public will ever see it. Under New York state law the former president would have to give his approval to its release, though US media',
+      source: "The Guardian",
+    },
+    {
+      id: 6,
+      url: "https://www.bbc.com/news/uk-65180096",
+      title: "Prince William recruits Jacinda Ardern for environment role",
+      author: "Charley Adams",
+      published_date: "2023-04-04T00:00:00Z",
+      parsed_content:
+        'Jacinda Ardern has been appointed a trustee of the Prince of Wales\' prestigious environment award, Kensington Palace has confirmed.  Prince William said it was an honour to welcome the former leader of New Zealand to the Earthshot Prize. Ms Ardern resigned in January saying she no longer had "enough in the tank" to lead the country.  The former prime minister said she was "humbled and excited to be working with the Earthshot team".  Speaking of the appointment, Prince William said Ms Ardern\'s "life-long commitment to supporting sustainable and environmental solutions" and her experience would "bring a rich infusion of new thinking to our mission".  "Four years ago, before the Earthshot Prize even had a name, Jacinda was one of the first people I spoke to, and her encouragement and advice was crucial to the prize\'s early success. "I am hugely grateful to her for joining us as she takes the next steps in her career," he added.  The Earthshot Prize was created by Prince William to fund projects that aim to save the planet.  Last year\'s awards in December, hosted by Prince William and Princess Catherine, saw five prizes handed out to winners from the UK, India, Australia, Kenya and Oman. On joining Earthshot\'s board of trustees, Ms Ardern said since its creation she had believed in the prize\'s "power to encourage and spread not only the innovation we desperately need, but also optimism". The former prime minister of New Zealand attended the Earthshot Prize Innovation Summit in New York in September 2022 where she spoke on behalf of Prince William, who had stayed in the UK following the death of the late Queen Elizabeth.  Chair of the board of trustees Christiana Figueres said she was "thrilled" to welcome Ms Ardern and had long been inspired by her "work as a catalysing force in the effort to combat climate change". Since her resignation, Ms Ardern is also due to serve as an unpaid special envoy for the Christchurch Call, which she co-founded in 2019 to bring technology companies and countries together to combat extremism, according to Reuters news agency.  Prince William and Ms Ardern have met on numerous occasions, including when the former leader of New Zealand visited Kensington Palace during a visit to Britain in July last year.  Alongside his wife Catherine, Prince William also visited New Zealand in 2019 where he met survivors of the Christchurch mosque attacks.  Prince William unveils Earthshot Prize shortlist Jacinda Ardern\'s last day as NZ prime minister',
+      summarized_content:
+        'Prince William has recruited Jacinda Ardern for a role on the board of trustees for the Prince of Wales\' prestigious environment award, the Earthshot Prize. Ardern resigned as Prime Minister of New Zealand in January, saying she no longer had "enough in the tank" to lead the country. However, she has remained active in environmental causes, and Prince William said he is "humbled and excited" to have her on board. The Earthshot Prize was created to fund projects that aim to save the planet, and last year\'s awards saw five prizes handed out to winners from the UK, India, Australia, Kenya and Oman. Ardern is also due to serve as an unpaid special envoy for the Christchurch Call, which she co-founded in 2019 to combat extremism.',
+      source: "BBC",
+    },
+    {
+      id: 18,
+      url: "https://www.bbc.com/news/business-65026330",
+      title: "Spice sales boom as home cooks get more adventurous",
+      author: "Egon Cossou",
+      published_date: "2023-03-29T00:00:00Z",
+      parsed_content:
+        'What are you planning to cook when you next make something from scratch in the kitchen? A nice bit of salmon? Lamb chops? Or maybe a vegan pasta dish? Whatever you have in mind, it will probably involve using some form of spice or herb - whether it\'s just a sprinkle of freshly ground black pepper, a hint of thyme, or a blizzard of cumin. "Spice is the key," says UK TV chef and cookery book writer Parveen Ashraf - also known as the "Spice Queen". "It livens up food, gives it flavour, it makes it come alive." She believes there\'s a clear current winner in the battle for our taste buds. "The spice I think that\'s really taken over is turmeric," she says. "Now next time you go out, you notice everything that\'s got turmeric in it. It\'s everywhere." If you are a big fan of spicy food, then buying spices for your cooking is something you take for granted. Yet industry expert Donald Pratt says that demand for herbs and spices has actually risen strongly in recent years.  Mr Pratt, who is in charge of sourcing for US giant McCormick - the biggest spices and herbs company on the planet - says there are a number of factors behind the current strength of the market. "We think the pandemic accelerated the aspect of everyone being a bit more sophisticated in the kitchen," he says. "And you see younger generations getting into heat and flavour explorations all over the place. We see it across  the board globally as cultures and cuisines come together." He adds that increased health concerns are also playing a part. "The desire to eat healthier is a global trend. So more home cooking with natural ingredients, and replacing salt, sugar and fats with flavour from herbs and spices." Such is the increased use of herbs and spices in cooking around the world, that one report estimates that the global market will be worth $126bn (£103bn) by the end of this year, up from $79bn in 2022. Ms Ashraf adds that the increased use of different spices is being fuelled by people posting photos, videos and recipes of their cooking on social media. "Suddenly you\'ve got recipes that travel around the world at the touch of your fingertips," she says. In addition, Ms Ashraf points to studies which suggest that spices such as turmeric, cumin and cinnamon have direct health benefits, which she says further adds to their popularity. On a country-by-country basis the biggest producer of spices is India. It is also the largest exporter, and in the financial year 2021-22 the value of its exports totalled $4.1bn. Other major spice-exporting countries include Indonesia, China, Vietnam and Brazil. But even if your country earns millions exporting spices, you won\'t necessarily make a decent living working in the industry at the farm level. In fact, some critics like Sana Javeri Khadri say poverty is endemic to the sector. She\'s the Mumbai-based founder of spice trading firm Diaspora Co. Her venture now buys spices from 150 farms across India and Sri Lanka, and aims to combat low pay in the industry. "Farmers are getting paid very little," says Ms Khadri. To try to lift wages in the sector she is disrupting the traditional trading model for Indian spice, by buying directly from farms instead of going via middlemen. As a result she says that she can pay the farm owners four times as much. She adds that in turn she is encouraging the farm owners to pay more to their workers out in the fields, "with moderate success". She wants to see wages go up from about 300-350 rupees a day ($3.60-$4.20; £3-£3.50) to 500-600 rupees a day. Ms Khadri also wants to see farm owners improve living conditions for workers, which in poorer regions can be "absolutely awful". More from the BBC\'s series taking an international perspective on trade. Mr Pratt says McCormick takes a leadership role in raising standards across the industry, especially when it comes to stamping out worker exploitation and promoting sustainability. "What we\'re bringing - whether it be technically supporting good agricultural practices, or how to introduce biodiversity into their supply chains, or how to help them to improve their living conditions - are all part of our contribution," he says. "We\'re in the industry to figure out how to make it even more resilient, so 20, 30, 40 years from now, farming communities are still delivering wholesome herbs and spices." In California, Krissy Scommegna is the co-owner of Booneville Barn Collective, which sells dried chillies and other products made from crops grown at its seven-acre farm in Anderson Valley, some 125 miles north of San Francisco. She says that higher energy bills and other inflationary pressures are having an impact on the business, as they are on other farms and food producers. "We\'re trying to figure out how we can internalise some of the increased cost, instead of having to raise prices on people," says Ms Scommegna. "No-one wants to raise the price right now, and consumers don\'t want to see a higher price." TV chef Ms Ashraf believes that even with the difficulties facing some in the spice trade, demand from consumers will only grow and grow. She points to her own children as a sign of things to come. "Their palates are more international than mine was [at that age] and I think their children will be even more au fait with food from different cultures."',
+      summarized_content:
+        'The global market for herbs and spices is expected to be worth $126bn by the end of this year, up from $79bn in 2022, according to one report. The increased use of different spices is being fuelled by people posting photos, videos and recipes of their cooking on social media. TV chef Parveen Ashraf believes that the spice turmeric has "taken over" in recent years.\n\nIndustry expert Donald Pratt says that the increased demand for herbs and spices is due to a number of factors, including people becoming more sophisticated in their cooking, as well as health concerns. He adds that the increased use of herbs and spices in cooking around the world is also due to cultures and cuisines coming together.\n\nThe biggest producer of spices is India, which is also the largest exporter. However, some critics like Sana Javeri Khadri say poverty is endemic to the sector. She\'s the Mumbai-based founder of spice trading firm Diaspora Co. Her venture now buys spices from 150 farms across India and Sri Lanka, and aims to combat low pay in the industry.\n\nMr Pratt says McCormick takes a leadership role in raising standards across the industry, especially when it comes to stamping out worker exploitation and promoting sustainability. In California, Krissy Scommegna is the co-owner of Booneville Barn Collective, which sells dried chillies and other products made from crops grown at its seven-acre farm in Anderson Valley. She says that higher energy bills and other inflationary pressures are having an impact on the business, as they are on other farms and food producers.\n\nTV chef Ms Ashraf believes that even with the difficulties facing some in the spice trade, demand from consumers will only grow and grow.',
+      source: "Daily Mail",
+    },
+    {
+      id: 19,
+      url: "https://www.bbc.com/news/uk-england-south-yorkshire-65112610",
+      title: "Film fan creates hundreds of miniature movie sets",
+      author: "Jasmine DuFraisse & PA Media",
+      published_date: "2023-03-29T00:00:00Z",
+      parsed_content:
+        "A cinema fanatic has recreated more than 1,600 miniature film-set snapshots using household items and figurines. Steve Berry, 43, from Sheffield, has been staging scenes from movies including Scream, Jurassic Park and Star Wars, since 2020. His creations have earned him thousands of followers through social media where he regularly posts. He said the support of his followers had \"spurred on\" a passion he hopes will become \"an art form\". Mr Berry said he blends miniature figurines and props before playing with perspective and lighting to create the final image. \"Seeing the film you've seen a million times from a different angle - that's the type of thing I'm trying to go for,\" said Mr Berry, who dreams of working at Pinewood Studios. \"I don't consider it a hobby because I'm really wanting to get out there and do something with it. I want to change it into an art form.\" He said each shot takes between three and four hours to create. His work includes iconic scenes such as serial slasher Ghostface, from horror franchise Scream, on a busy subway train, a roaring Jurassic Park dinosaur in the rain, and the Lord Of The Rings' Gates of Argonath. Mr Berry first began experimenting with Lego during the first Covid-19 lockdown of 2020 and soon elevated his work to sculptures and hyper-realistic film scenes. He began posting to Instagram, where he has more than 4,400 followers, and now also shares his work with some 2,000 users on Twitter and more than 12,000 on Tumblr. \"It ended up skyrocketing a bit,\" he said. \"I got loads of really nice messages from people saying 'You've really cheered me up. I know it sounds a bit weird but my Grandad's died and I look forward to your next post because they always cheer me up and it's a bit of silliness'.\" He said while he enjoys the reaction to his work he has considered stopping \"There's been moments when I've just wanted to quit, and I just get people going 'Please don't give up. Just keep going.' \"I'm really pushing - I'm so passionate about this, so I just want to be the best that I can possibly be, [make] the best work that I can possible create.\" Follow BBC Yorkshire on Facebook, Twitter and Instagram. Send your story ideas to yorkslincs.news@bbc.co.uk. Photographer shoots intricate scenes with Star Wars Lego 'Why I recreate famous movie scenes online'",
+      summarized_content:
+        "A cinema fanatic has recreated more than 1,600 miniature film-set snapshots using household items and figurines. Steve Berry, 43, from Sheffield, has been staging scenes from movies including Scream, Jurassic Park and Star Wars, since 2020. His creations have earned him thousands of followers through social media where he regularly posts. He said the support of his followers had \"spurred on\" a passion he hopes will become \"an art form\".\n\nMr Berry said he blends miniature figurines and props before playing with perspective and lighting to create the final image. \"Seeing the film you've seen a million times from a different angle - that's the type of thing I'm trying to go for,\" said Mr Berry, who dreams of working at Pinewood Studios. \"I don't consider it a hobby because I'm really wanting to get out there and do something with it. I want to change it into an art form.\"\n\nHe said each shot takes between three and four hours to create. His work includes iconic scenes such as serial slasher Ghostface, from horror franchise Scream, on a busy subway train, a roaring Jurassic Park dinosaur in the rain, and the Lord Of The Rings' Gates of Argonath.\n\nMr Berry first began experimenting with Lego during the first Covid-19 lockdown of 2020 and soon elevated his work to sculptures and hyper-realistic film scenes. He began posting to Instagram, where he has more than 4,400 followers, and now also shares his work with some 2,000 users on Twitter and more than 12,000 on Tumblr.\n\n\"It ended up skyrocketing a bit,\" he said. \"I got loads of really nice messages from people saying 'You've really cheered me up. I know it sounds a bit weird but my Grandad's died and I look forward to your next post because they always cheer me up and it's a bit of silliness'.\"\n\nHe said while he enjoys the reaction to his work he has considered stopping \"There's been moments when I've just wanted to quit, and I just get people going 'Please don't give up. Just keep going.'\n\n\"I'm really pushing - I'm so passionate about this, so I just want to be the best that I can possibly be, [make] the best work that I can possible create.\"",
+      source: "BBC",
+    },
+    {
+      id: 19,
+      url: "https://www.bbc.com/news/uk-england-south-yorkshire-65112610",
+      title: "Film fan creates hundreds of miniature movie sets",
+      author: "Jasmine DuFraisse & PA Media",
+      published_date: "2023-03-29T00:00:00Z",
+      parsed_content:
+        "A cinema fanatic has recreated more than 1,600 miniature film-set snapshots using household items and figurines. Steve Berry, 43, from Sheffield, has been staging scenes from movies including Scream, Jurassic Park and Star Wars, since 2020. His creations have earned him thousands of followers through social media where he regularly posts. He said the support of his followers had \"spurred on\" a passion he hopes will become \"an art form\". Mr Berry said he blends miniature figurines and props before playing with perspective and lighting to create the final image. \"Seeing the film you've seen a million times from a different angle - that's the type of thing I'm trying to go for,\" said Mr Berry, who dreams of working at Pinewood Studios. \"I don't consider it a hobby because I'm really wanting to get out there and do something with it. I want to change it into an art form.\" He said each shot takes between three and four hours to create. His work includes iconic scenes such as serial slasher Ghostface, from horror franchise Scream, on a busy subway train, a roaring Jurassic Park dinosaur in the rain, and the Lord Of The Rings' Gates of Argonath. Mr Berry first began experimenting with Lego during the first Covid-19 lockdown of 2020 and soon elevated his work to sculptures and hyper-realistic film scenes. He began posting to Instagram, where he has more than 4,400 followers, and now also shares his work with some 2,000 users on Twitter and more than 12,000 on Tumblr. \"It ended up skyrocketing a bit,\" he said. \"I got loads of really nice messages from people saying 'You've really cheered me up. I know it sounds a bit weird but my Grandad's died and I look forward to your next post because they always cheer me up and it's a bit of silliness'.\" He said while he enjoys the reaction to his work he has considered stopping \"There's been moments when I've just wanted to quit, and I just get people going 'Please don't give up. Just keep going.' \"I'm really pushing - I'm so passionate about this, so I just want to be the best that I can possibly be, [make] the best work that I can possible create.\" Follow BBC Yorkshire on Facebook, Twitter and Instagram. Send your story ideas to yorkslincs.news@bbc.co.uk. Photographer shoots intricate scenes with Star Wars Lego 'Why I recreate famous movie scenes online'",
+      summarized_content:
+        "A cinema fanatic has recreated more than 1,600 miniature film-set snapshots using household items and figurines. Steve Berry, 43, from Sheffield, has been staging scenes from movies including Scream, Jurassic Park and Star Wars, since 2020. His creations have earned him thousands of followers through social media where he regularly posts. He said the support of his followers had \"spurred on\" a passion he hopes will become \"an art form\".\n\nMr Berry said he blends miniature figurines and props before playing with perspective and lighting to create the final image. \"Seeing the film you've seen a million times from a different angle - that's the type of thing I'm trying to go for,\" said Mr Berry, who dreams of working at Pinewood Studios. \"I don't consider it a hobby because I'm really wanting to get out there and do something with it. I want to change it into an art form.\"\n\nHe said each shot takes between three and four hours to create. His work includes iconic scenes such as serial slasher Ghostface, from horror franchise Scream, on a busy subway train, a roaring Jurassic Park dinosaur in the rain, and the Lord Of The Rings' Gates of Argonath.\n\nMr Berry first began experimenting with Lego during the first Covid-19 lockdown of 2020 and soon elevated his work to sculptures and hyper-realistic film scenes. He began posting to Instagram, where he has more than 4,400 followers, and now also shares his work with some 2,000 users on Twitter and more than 12,000 on Tumblr.\n\n\"It ended up skyrocketing a bit,\" he said. \"I got loads of really nice messages from people saying 'You've really cheered me up. I know it sounds a bit weird but my Grandad's died and I look forward to your next post because they always cheer me up and it's a bit of silliness'.\"\n\nHe said while he enjoys the reaction to his work he has considered stopping \"There's been moments when I've just wanted to quit, and I just get people going 'Please don't give up. Just keep going.'\n\n\"I'm really pushing - I'm so passionate about this, so I just want to be the best that I can possibly be, [make] the best work that I can possible create.\"",
+      source: "The Guardian",
+    },
+    {
+      id: 19,
+      url: "https://www.bbc.com/news/uk-england-south-yorkshire-65112610",
+      title: "Film fan creates hundreds of miniature movie sets",
+      author: "Jasmine DuFraisse & PA Media",
+      published_date: "2023-03-29T00:00:00Z",
+      parsed_content:
+        "A cinema fanatic has recreated more than 1,600 miniature film-set snapshots using household items and figurines. Steve Berry, 43, from Sheffield, has been staging scenes from movies including Scream, Jurassic Park and Star Wars, since 2020. His creations have earned him thousands of followers through social media where he regularly posts. He said the support of his followers had \"spurred on\" a passion he hopes will become \"an art form\". Mr Berry said he blends miniature figurines and props before playing with perspective and lighting to create the final image. \"Seeing the film you've seen a million times from a different angle - that's the type of thing I'm trying to go for,\" said Mr Berry, who dreams of working at Pinewood Studios. \"I don't consider it a hobby because I'm really wanting to get out there and do something with it. I want to change it into an art form.\" He said each shot takes between three and four hours to create. His work includes iconic scenes such as serial slasher Ghostface, from horror franchise Scream, on a busy subway train, a roaring Jurassic Park dinosaur in the rain, and the Lord Of The Rings' Gates of Argonath. Mr Berry first began experimenting with Lego during the first Covid-19 lockdown of 2020 and soon elevated his work to sculptures and hyper-realistic film scenes. He began posting to Instagram, where he has more than 4,400 followers, and now also shares his work with some 2,000 users on Twitter and more than 12,000 on Tumblr. \"It ended up skyrocketing a bit,\" he said. \"I got loads of really nice messages from people saying 'You've really cheered me up. I know it sounds a bit weird but my Grandad's died and I look forward to your next post because they always cheer me up and it's a bit of silliness'.\" He said while he enjoys the reaction to his work he has considered stopping \"There's been moments when I've just wanted to quit, and I just get people going 'Please don't give up. Just keep going.' \"I'm really pushing - I'm so passionate about this, so I just want to be the best that I can possibly be, [make] the best work that I can possible create.\" Follow BBC Yorkshire on Facebook, Twitter and Instagram. Send your story ideas to yorkslincs.news@bbc.co.uk. Photographer shoots intricate scenes with Star Wars Lego 'Why I recreate famous movie scenes online'",
+      summarized_content:
+        "A cinema fanatic has recreated more than 1,600 miniature film-set snapshots using household items and figurines. Steve Berry, 43, from Sheffield, has been staging scenes from movies including Scream, Jurassic Park and Star Wars, since 2020. His creations have earned him thousands of followers through social media where he regularly posts. He said the support of his followers had \"spurred on\" a passion he hopes will become \"an art form\".\n\nMr Berry said he blends miniature figurines and props before playing with perspective and lighting to create the final image. \"Seeing the film you've seen a million times from a different angle - that's the type of thing I'm trying to go for,\" said Mr Berry, who dreams of working at Pinewood Studios. \"I don't consider it a hobby because I'm really wanting to get out there and do something with it. I want to change it into an art form.\"\n\nHe said each shot takes between three and four hours to create. His work includes iconic scenes such as serial slasher Ghostface, from horror franchise Scream, on a busy subway train, a roaring Jurassic Park dinosaur in the rain, and the Lord Of The Rings' Gates of Argonath.\n\nMr Berry first began experimenting with Lego during the first Covid-19 lockdown of 2020 and soon elevated his work to sculptures and hyper-realistic film scenes. He began posting to Instagram, where he has more than 4,400 followers, and now also shares his work with some 2,000 users on Twitter and more than 12,000 on Tumblr.\n\n\"It ended up skyrocketing a bit,\" he said. \"I got loads of really nice messages from people saying 'You've really cheered me up. I know it sounds a bit weird but my Grandad's died and I look forward to your next post because they always cheer me up and it's a bit of silliness'.\"\n\nHe said while he enjoys the reaction to his work he has considered stopping \"There's been moments when I've just wanted to quit, and I just get people going 'Please don't give up. Just keep going.'\n\n\"I'm really pushing - I'm so passionate about this, so I just want to be the best that I can possibly be, [make] the best work that I can possible create.\"",
+      source: "Daily Mail",
+    },
+    {
+      id: 19,
+      url: "https://www.bbc.com/news/uk-england-south-yorkshire-65112610",
+      title: "Film fan creates hundreds of miniature movie sets",
+      author: "Jasmine DuFraisse & PA Media",
+      published_date: "2023-03-29T00:00:00Z",
+      parsed_content:
+        "A cinema fanatic has recreated more than 1,600 miniature film-set snapshots using household items and figurines. Steve Berry, 43, from Sheffield, has been staging scenes from movies including Scream, Jurassic Park and Star Wars, since 2020. His creations have earned him thousands of followers through social media where he regularly posts. He said the support of his followers had \"spurred on\" a passion he hopes will become \"an art form\". Mr Berry said he blends miniature figurines and props before playing with perspective and lighting to create the final image. \"Seeing the film you've seen a million times from a different angle - that's the type of thing I'm trying to go for,\" said Mr Berry, who dreams of working at Pinewood Studios. \"I don't consider it a hobby because I'm really wanting to get out there and do something with it. I want to change it into an art form.\" He said each shot takes between three and four hours to create. His work includes iconic scenes such as serial slasher Ghostface, from horror franchise Scream, on a busy subway train, a roaring Jurassic Park dinosaur in the rain, and the Lord Of The Rings' Gates of Argonath. Mr Berry first began experimenting with Lego during the first Covid-19 lockdown of 2020 and soon elevated his work to sculptures and hyper-realistic film scenes. He began posting to Instagram, where he has more than 4,400 followers, and now also shares his work with some 2,000 users on Twitter and more than 12,000 on Tumblr. \"It ended up skyrocketing a bit,\" he said. \"I got loads of really nice messages from people saying 'You've really cheered me up. I know it sounds a bit weird but my Grandad's died and I look forward to your next post because they always cheer me up and it's a bit of silliness'.\" He said while he enjoys the reaction to his work he has considered stopping \"There's been moments when I've just wanted to quit, and I just get people going 'Please don't give up. Just keep going.' \"I'm really pushing - I'm so passionate about this, so I just want to be the best that I can possibly be, [make] the best work that I can possible create.\" Follow BBC Yorkshire on Facebook, Twitter and Instagram. Send your story ideas to yorkslincs.news@bbc.co.uk. Photographer shoots intricate scenes with Star Wars Lego 'Why I recreate famous movie scenes online'",
+      summarized_content:
+        "A cinema fanatic has recreated more than 1,600 miniature film-set snapshots using household items and figurines. Steve Berry, 43, from Sheffield, has been staging scenes from movies including Scream, Jurassic Park and Star Wars, since 2020. His creations have earned him thousands of followers through social media where he regularly posts. He said the support of his followers had \"spurred on\" a passion he hopes will become \"an art form\".\n\nMr Berry said he blends miniature figurines and props before playing with perspective and lighting to create the final image. \"Seeing the film you've seen a million times from a different angle - that's the type of thing I'm trying to go for,\" said Mr Berry, who dreams of working at Pinewood Studios. \"I don't consider it a hobby because I'm really wanting to get out there and do something with it. I want to change it into an art form.\"\n\nHe said each shot takes between three and four hours to create. His work includes iconic scenes such as serial slasher Ghostface, from horror franchise Scream, on a busy subway train, a roaring Jurassic Park dinosaur in the rain, and the Lord Of The Rings' Gates of Argonath.\n\nMr Berry first began experimenting with Lego during the first Covid-19 lockdown of 2020 and soon elevated his work to sculptures and hyper-realistic film scenes. He began posting to Instagram, where he has more than 4,400 followers, and now also shares his work with some 2,000 users on Twitter and more than 12,000 on Tumblr.\n\n\"It ended up skyrocketing a bit,\" he said. \"I got loads of really nice messages from people saying 'You've really cheered me up. I know it sounds a bit weird but my Grandad's died and I look forward to your next post because they always cheer me up and it's a bit of silliness'.\"\n\nHe said while he enjoys the reaction to his work he has considered stopping \"There's been moments when I've just wanted to quit, and I just get people going 'Please don't give up. Just keep going.'\n\n\"I'm really pushing - I'm so passionate about this, so I just want to be the best that I can possibly be, [make] the best work that I can possible create.\"",
+      source: "BBC",
+    },
+    {
+      id: 19,
+      url: "https://www.bbc.com/news/uk-england-south-yorkshire-65112610",
+      title: "Film fan creates hundreds of miniature movie sets",
+      author: "Jasmine DuFraisse & PA Media",
+      published_date: "2023-03-29T00:00:00Z",
+      parsed_content:
+        "A cinema fanatic has recreated more than 1,600 miniature film-set snapshots using household items and figurines. Steve Berry, 43, from Sheffield, has been staging scenes from movies including Scream, Jurassic Park and Star Wars, since 2020. His creations have earned him thousands of followers through social media where he regularly posts. He said the support of his followers had \"spurred on\" a passion he hopes will become \"an art form\". Mr Berry said he blends miniature figurines and props before playing with perspective and lighting to create the final image. \"Seeing the film you've seen a million times from a different angle - that's the type of thing I'm trying to go for,\" said Mr Berry, who dreams of working at Pinewood Studios. \"I don't consider it a hobby because I'm really wanting to get out there and do something with it. I want to change it into an art form.\" He said each shot takes between three and four hours to create. His work includes iconic scenes such as serial slasher Ghostface, from horror franchise Scream, on a busy subway train, a roaring Jurassic Park dinosaur in the rain, and the Lord Of The Rings' Gates of Argonath. Mr Berry first began experimenting with Lego during the first Covid-19 lockdown of 2020 and soon elevated his work to sculptures and hyper-realistic film scenes. He began posting to Instagram, where he has more than 4,400 followers, and now also shares his work with some 2,000 users on Twitter and more than 12,000 on Tumblr. \"It ended up skyrocketing a bit,\" he said. \"I got loads of really nice messages from people saying 'You've really cheered me up. I know it sounds a bit weird but my Grandad's died and I look forward to your next post because they always cheer me up and it's a bit of silliness'.\" He said while he enjoys the reaction to his work he has considered stopping \"There's been moments when I've just wanted to quit, and I just get people going 'Please don't give up. Just keep going.' \"I'm really pushing - I'm so passionate about this, so I just want to be the best that I can possibly be, [make] the best work that I can possible create.\" Follow BBC Yorkshire on Facebook, Twitter and Instagram. Send your story ideas to yorkslincs.news@bbc.co.uk. Photographer shoots intricate scenes with Star Wars Lego 'Why I recreate famous movie scenes online'",
+      summarized_content:
+        "A cinema fanatic has recreated more than 1,600 miniature film-set snapshots using household items and figurines. Steve Berry, 43, from Sheffield, has been staging scenes from movies including Scream, Jurassic Park and Star Wars, since 2020. His creations have earned him thousands of followers through social media where he regularly posts. He said the support of his followers had \"spurred on\" a passion he hopes will become \"an art form\".\n\nMr Berry said he blends miniature figurines and props before playing with perspective and lighting to create the final image. \"Seeing the film you've seen a million times from a different angle - that's the type of thing I'm trying to go for,\" said Mr Berry, who dreams of working at Pinewood Studios. \"I don't consider it a hobby because I'm really wanting to get out there and do something with it. I want to change it into an art form.\"\n\nHe said each shot takes between three and four hours to create. His work includes iconic scenes such as serial slasher Ghostface, from horror franchise Scream, on a busy subway train, a roaring Jurassic Park dinosaur in the rain, and the Lord Of The Rings' Gates of Argonath.\n\nMr Berry first began experimenting with Lego during the first Covid-19 lockdown of 2020 and soon elevated his work to sculptures and hyper-realistic film scenes. He began posting to Instagram, where he has more than 4,400 followers, and now also shares his work with some 2,000 users on Twitter and more than 12,000 on Tumblr.\n\n\"It ended up skyrocketing a bit,\" he said. \"I got loads of really nice messages from people saying 'You've really cheered me up. I know it sounds a bit weird but my Grandad's died and I look forward to your next post because they always cheer me up and it's a bit of silliness'.\"\n\nHe said while he enjoys the reaction to his work he has considered stopping \"There's been moments when I've just wanted to quit, and I just get people going 'Please don't give up. Just keep going.'\n\n\"I'm really pushing - I'm so passionate about this, so I just want to be the best that I can possibly be, [make] the best work that I can possible create.\"",
+      source: "BBC",
+    },
+  ];
+
+  useEffect(() => {
+    // const fetchNewsArticles = async () => {
+    //   setLoading(true);
+    //   // const res = await axios.get("https://jsonplaceholder.typicode.com/posts");
+    //   // setPosts(res.data);
+    //   setNewsArticles(news_articles);
+    //   setLoading(false);
+    // };
+    // fetchPosts();
+    const fetchNewsArticles = () => {
+      setLoading(true);
+      setNewsArticles(news_articles);
+      setLoading(false);
+    };
+    fetchNewsArticles();
+  }, []);
+
+  // Get current news articles
+  const indexOfLastPost = currentPage * newsArticlesPerPage;
+  const indexOfFirstPost = indexOfLastPost - newsArticlesPerPage;
+  const currentNewsArticles = newsArticles.slice(
+    indexOfFirstPost,
+    indexOfLastPost
+  );
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  console.log(currentNewsArticles);
+
+  const pageNumbers = [];
+
+  for (let i = 1; i <= Math.ceil(newsArticles.length / newsArticlesPerPage); i++) {
+    pageNumbers.push(i);
+  }
+
+  return (
+    <div className="container mt-5">
+      <h1 className="col text-primary mb-5 p-0">News Articles</h1>
+      <div className="form-group mb-5">
+        <input
+          className="form-control"
+          id="inputdefault"
+          type="text"
+          placeholder="Search for an article by title"
+          onChange={(e) => setSearchValue(e.target.value.toLowerCase())}
+        />
+      </div>
+      <NewsArticles
+        articles={currentNewsArticles}
+        searchVal={searchValue}
+        loading={loading}
+      />
+      <nav>
+        <ul className="pagination my-5 mx-auto float-right">
+          {pageNumbers.map((number) => (
+            <li key={number} className="page-item">
+              <a
+                onClick={() => paginate(number)}
+                href={"#!" + number}
+                className="page-link"
+              >
+                {number}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  );
+};
+
+export default Home;
+```
+3) NewsArticles.js - this serves as the container of the NewsArticle.js and contains the logic for filtering the news articles according to the keywords and their source. 
+```
+import React, { useState, useEffect } from "react";
+import NewsArticle from "./NewsArticle";
+
+const NewsArticles = ({ articles, searchVal, loading }) => {
+  const newsArticles = articles ? articles : "";
+  const searchValue = searchVal ? searchVal : ""; 
+
+  if (loading) {
+    return <h2>Loading...</h2>;
+  }
+  
+  console.log("searchVal ", searchValue);
+  return (
+    <div className="all__news">
+      {newsArticles.filter((article)=> {
+        if(searchValue == ""){
+          return article;
+        }
+        else if(article.title.toLowerCase().includes(searchValue.toLowerCase())){
+          return article;
+        }
+        else if(article.source.toLowerCase().includes(searchValue.toLowerCase())){
+          return article;
+        }
+        else if(article.summarized_content.toLowerCase().includes(searchValue.toLowerCase())){
+          return article;
+        }
+      }).map((article, key) => {
+        return(
+          <NewsArticle newsArticle={article} loading={loading}/>
+        );
+      })}
+    </div>
+  );
+};
+
+export default NewsArticles;
+```
+4) NewsArticle.js - this serves as the news article component that is displayed in the home page. This contains the article's title, author, published date, source, and a sneak peak of its summary
+```
+import React from "react";
+import { Link } from "react-router-dom";
+
+const NewsArticle = ({ newsArticle, loading }) => {
+  if (loading) {
+    return <h2>Loading...</h2>;
+  }
+
+  const getBadgeColor = (source) => {
+    let color;
+    if (source === "BBC") {
+      color = "badge-primary";
+    } else if (source === "Daily Mail") {
+      color = "badge-success";
+    } else if (source === "The Guardian") {
+      color = "badge-warning";
+    }
+
+    return color;
+  };
+
+  return (
+    <Link to="/newsarticle" state={newsArticle}>
+      <div className="news" href="#">
+        <h1 className="news__title ">{newsArticle.title}</h1>
+        <span className={"badge mr-2 " + getBadgeColor(newsArticle.source)}>
+          {newsArticle.source}
+        </span>
+        <span className="news__author">{newsArticle.author}</span>
+        <p className="news__published">
+          {newsArticle.published_date.substring(0, 10)}
+        </p>
+        <div className="container__news__desc">
+          <p className="news__desc">{newsArticle.summarized_content}</p>
+        </div>
+        <button className="btn btn-link mt-3 text-primary p-0">
+          Read More
+        </button>
+      </div>
+    </Link>
+  );
+};
+
+export default NewsArticle;
+```
+5) Pagination.js - serves as the display of the pagination ui.
+```
+import React from 'react';
+
+const Pagination = ({ newsArticlesPerPage, totalNewsArticles, paginate }) => {
+  const pageNumbers = [];
+
+  for (let i = 1; i <= Math.ceil(totalNewsArticles / newsArticlesPerPage); i++) {
+    pageNumbers.push(i);
+  }
+
+  return (
+    <nav>
+      <ul className='pagination my-5 mx-auto float-right'>
+        {pageNumbers.map(number => (
+          <li key={number} className='page-item'>
+            <a onClick={() => paginate(number)} href='!#' className='page-link'>
+              {number}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+};
+
+export default Pagination;
+```
