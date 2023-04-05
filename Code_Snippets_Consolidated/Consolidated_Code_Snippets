@@ -18,7 +18,7 @@ This Backend API displays and parses+summarizes three reputable sources namely, 
 2) POST all parsed and summarized articles. 
     2.1) The flow of the POST request is to get the parsed articles.
         ```
-            news_articles = parse_bbc()
+            news_articles = parse_bbc() # this is the parser that parses bbc articles and returns a list of articles containing information such as title, author, url, published_date, parsed content, and summarized content
         ```
     2.2) Iterate each one to get their article details.
         ````
@@ -26,7 +26,7 @@ This Backend API displays and parses+summarizes three reputable sources namely, 
                 for article in news_articles[10:]:
                     # Extract all article details
                     title = article.get('Title')
-                    author = article.get('Author')
+                    author = article.get('Author')	
                     published_date = article.get('Published Date')
                     parsed_content = article.get('Content')
         `````
@@ -39,7 +39,7 @@ This Backend API displays and parses+summarizes three reputable sources namely, 
             # If not yet in cache, generate its summary and add to DB. Else, no need to parse and summarize it again.
             if news_article is None:
                 # Summarize the parsed content using your machine learning script
-                summarized_content = generate_summary(article)
+                summarized_content = generate_summary(article) # this generate_summary uses GPT-3 to summarize the content of the news article
 
                 # Create a NewsArticle object and save it to the database
                 news_article = NewsArticle(
@@ -52,7 +52,7 @@ This Backend API displays and parses+summarizes three reputable sources namely, 
                 )
                 news_article.save()
 
-                # Cache the news article for future requests
+                # Cache the news article for future requests. We use django cache in here.
                 cache.set(cache_key, news_article)
         ```
     2.4) If it successfully renders, it will have a response of "Success". Else, "Error".
@@ -122,7 +122,7 @@ from .models import NewsArticle
 from .serializers import NewsArticleSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from scraper.scraper import parse_bbc, parse_guardian, parse_daily_mail
+from scraper.scraper import parse_bbc, parse_guardian, parse_daily_mail #parse_guardian and parse_daily are other parsing functions that returns list of articles from The Guardian and Daily Mail, respectively
 from summarizer.summarizer import generate_summary
 from django.db import transaction
 
@@ -179,3 +179,266 @@ class NewsArticleList(APIView):
             return Response("Success")
         except:
             return Response("Error")
+
+
+- This is the code snippit for the generate_summary function mentioned above
+import openai
+
+def generate_summary(text):
+    openai.api_key = "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"    
+
+    # Generate summary using GPT-3 API using the configurations
+    max_tokens = 500
+    model_engine = "text-davinci-002"
+    prompt = (f"Please summarize the following text in {max_tokens} tokens:"
+              f"{text}")
+    completions = openai.Completion.create(
+        engine=model_engine, prompt=prompt, max_tokens=max_tokens, n=1, stop=None, temperature=0.5)
+    summary = completions.choices[0].text
+    return summary.strip()
+
+# News Article Summarizer
+
+This summarizer's goal is to display the brief and precise content of the news article. It uses GPT-3, an autoregressive language model released in 2020 that uses deep learning to produce human-like text.
+
+## How it Works
+1) It defines the API Key for the Open AI.
+```
+openai.api_key = "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"
+```
+2) Generate summary using GPT-3 API with the desired configurations. 
+```
+max_tokens = 500
+model_engine = "text-davinci-002"
+prompt = (f"Please summarize the following text in {max_tokens} tokens:"
+            f"{text}")
+completions = openai.Completion.create(
+    engine=model_engine, prompt=prompt, max_tokens=max_tokens, n=1, stop=None, temperature=0.5)
+summary = completions.choices[0].text
+```
+3) Returns the summary (with no double breaklines) for further procedure.
+```
+return summary.strip()
+```
+# Backend API
+
+This Backend API displays and parses+summarizes three reputable sources namely, BBC, The Guardian, and Daily Mail. It uses Beautiful Soup for web scraping, GPT-3 for Summarizing and an REST API. This Backend uses Postgresql as its database.
+
+
+## Methods
+1) GET all news articles
+```
+    # Retrieve all NewsArticle objects from the database
+    news_articles = NewsArticle.objects.all()
+
+    # Serialize the NewsArticle objects
+    serializer = NewsArticleSerializer(news_articles, many=True)
+
+    # Return the serialized NewsArticle objects as a JSON response
+    return Response({"news_articles": serializer.data})
+```
+2) POST all parsed and summarized articles. 
+    2.1) The flow of the POST request is to get the parsed articles.
+        ```
+            news_articles = parse_bbc() # this is the parser that parses bbc articles and returns a list of articles containing information such as title, author, url, published_date, parsed content, and summarized content
+        ```
+    2.2) Iterate each one to get their article details.
+        ````
+            try:
+                for article in news_articles[10:]:
+                    # Extract all article details
+                    title = article.get('Title')
+                    author = article.get('Author')	
+                    published_date = article.get('Published Date')
+                    parsed_content = article.get('Content')
+        `````
+    2.3) Check if it is already in the cache meaning it is already parsed, summarized, and added to database, then no need to generate summary and add to database. Else, we have to generate their summary, add to database, and lastly, add it to cache so that next time, it will not go through the same process again. This will save time and resources. The cache_key will serve as the one that we will look for.
+        ```
+            url = article.get('URL')
+            cache_key = f'news_article_{url}'
+            news_article = cache.get(cache_key)
+
+            # If not yet in cache, generate its summary and add to DB. Else, no need to parse and summarize it again.
+            if news_article is None:
+                # Summarize the parsed content using your machine learning script
+                summarized_content = generate_summary(article) # this generate_summary uses GPT-3 to summarize the content of the news article
+
+                # Create a NewsArticle object and save it to the database
+                news_article = NewsArticle(
+                    url=url,
+                    title=title,
+                    author=author,
+                    published_date=published_date,
+                    parsed_content=parsed_content,
+                    summarized_content=summarized_content,
+                )
+                news_article.save()
+
+                # Cache the news article for future requests. We use django cache in here.
+                cache.set(cache_key, news_article)
+        ```
+    2.4) If it successfully renders, it will have a response of "Success". Else, "Error".
+        ```
+                return Response("Success")
+            except:
+                return Response("Error")
+        ```
+
+- The following codes serve as the backend of News Article app where it has an API that has a GET Method for getting the list of news articles and a POST Method to add the parsed and summarized news articles from the chosen news sources. 
+
+- This is a Django Rest Framework and this is the API app folder. The following are the files and its contents.
+
+- Folder is admin.py
+- Contents are:
+from django.contrib import admin
+from .models import NewsArticle
+# Register your models here.
+
+admin.site.register(NewsArticle)
+
+- Folder is apps.py
+- Contents are:
+from django.apps import AppConfig
+
+class ApiConfig(AppConfig):
+    name = 'api'
+
+- Folder is models.py (this serves as the model of the News Article)
+- Contents are:
+from django.db import models
+
+class NewsArticle(models.Model):
+    url = models.CharField(max_length=255)
+    title = models.CharField(max_length=100)
+    author = models.CharField(max_length=255)
+    published_date = models.DateTimeField()
+    parsed_content = models.TextField()
+    summarized_content = models.TextField(null=True)
+
+    def __str__(self):
+        return self.title
+
+- Folder is serializers.py (This is helpful in passing the needed data to the frontend and vice versa)
+- Contents are:
+from rest_framework import serializers
+from .models import NewsArticle
+
+class NewsArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsArticle
+        fields = '__all__'
+
+- Folder is urls.py (This serves as the paths in navigating to the News Article List View)
+- Contents are:
+from django.urls import path
+from .views import NewsArticleList
+
+urlpatterns = [
+    path('articles/', NewsArticleList.as_view(), name='article-list')
+]
+
+- Folder is views.py (This serves as the logic or implementation in dealing with the data and this contains the GET and POST methods for the list of articles)
+- Contents are:
+from django.core.cache import cache
+from .models import NewsArticle
+from .serializers import NewsArticleSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from scraper.scraper import parse_bbc, parse_guardian, parse_daily_mail #parse_guardian and parse_daily are other parsing functions that returns list of articles from The Guardian and Daily Mail, respectively
+from summarizer.summarizer import generate_summary
+from django.db import transaction
+
+
+class NewsArticleList(APIView):
+    def get(self, request):
+        # Retrieve all NewsArticle objects from the database
+        news_articles = NewsArticle.objects.all()
+
+        # Serialize the NewsArticle objects
+        serializer = NewsArticleSerializer(news_articles, many=True)
+
+        # Return the serialized NewsArticle objects as a JSON response
+        return Response({"news_articles": serializer.data})
+
+    @transaction.atomic
+    def post(self, request):
+        # Get the parsed articles
+        news_articles = parse_bbc()
+
+        try:
+            for article in news_articles[10:]:
+                # Extract all article details
+                title = article.get('Title')
+                author = article.get('Author')
+                published_date = article.get('Published Date')
+                parsed_content = article.get('Content')
+
+                # Check if the news article has already been scraped
+                url = article.get('URL')
+                cache_key = f'news_article_{url}'
+                news_article = cache.get(cache_key)
+
+                # If not yet in cache, generate its summary and add to DB. Else, no need to parse and summarize it again.
+                if news_article is None:
+                    # Summarize the parsed content using your machine learning script
+                    summarized_content = generate_summary(article)
+
+                    # Create a NewsArticle object and save it to the database
+                    news_article = NewsArticle(
+                        url=url,
+                        title=title,
+                        author=author,
+                        published_date=published_date,
+                        parsed_content=parsed_content,
+                        summarized_content=summarized_content,
+                    )
+                    news_article.save()
+
+                    # Cache the news article for future requests
+                    cache.set(cache_key, news_article)
+                    
+            # Return the serialized NewsArticle object as a JSON response
+            return Response("Success")
+        except:
+            return Response("Error")
+
+
+- This is the code snippit for the generate_summary function mentioned above
+import openai
+
+def generate_summary(text):
+    openai.api_key = "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"    
+
+    # Generate summary using GPT-3 API using the configurations
+    max_tokens = 500
+    model_engine = "text-davinci-002"
+    prompt = (f"Please summarize the following text in {max_tokens} tokens:"
+              f"{text}")
+    completions = openai.Completion.create(
+        engine=model_engine, prompt=prompt, max_tokens=max_tokens, n=1, stop=None, temperature=0.5)
+    summary = completions.choices[0].text
+    return summary.strip()
+
+# News Article Summarizer
+
+This summarizer's goal is to display the brief and precise content of the news article. It uses GPT-3, an autoregressive language model released in 2020 that uses deep learning to produce human-like text.
+
+## How it Works
+1) It defines the API Key for the Open AI.
+```
+openai.api_key = "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"
+```
+2) Generate summary using GPT-3 API with the desired configurations. 
+```
+max_tokens = 500
+model_engine = "text-davinci-002"
+prompt = (f"Please summarize the following text in {max_tokens} tokens:"
+            f"{text}")
+completions = openai.Completion.create(
+    engine=model_engine, prompt=prompt, max_tokens=max_tokens, n=1, stop=None, temperature=0.5)
+summary = completions.choices[0].text
+```
+3) Returns the summary (with no double breaklines) for further procedure.
+```
+return summary.strip()
+```
